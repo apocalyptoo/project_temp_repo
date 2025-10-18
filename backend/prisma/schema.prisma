@@ -22,6 +22,10 @@ model User {
   password String
   role     Role     @default(PLAYER)
   createdAt DateTime @default(now())
+  verified    Boolean   @default(false)
+  verifyToken String?
+  resetToken   String?
+  resetTokenExpires DateTime?
 
   ownedTeams  Team[]        @relation("OwnedTeams")
   teamMembers TeamMember[]
