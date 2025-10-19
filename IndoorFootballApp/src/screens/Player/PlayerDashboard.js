@@ -11,7 +11,11 @@ export default function PlayerDashboard({ navigation }) {
       <Text style={{fontSize:18, marginBottom:12}}>Welcome, {user?.name}</Text>
       <Button title="Teams" onPress={() => navigation.navigate('Teams')} />
       <View style={{ marginTop: 8 }} />
+      <Button title="My Teams" onPress={() => navigation.navigate('MyTeams')} />
+      <View style={{ marginTop: 8 }} />
       <Button title="Players" onPress={() => navigation.navigate('Players')} />
+      <View style={{ marginTop: 8 }} />
+      <Button title="Invites" onPress={() => navigation.navigate('Invites')} />
       <View style={{ marginTop: 8 }} />
       <Button title="Logout" onPress={logout} />
     </View>

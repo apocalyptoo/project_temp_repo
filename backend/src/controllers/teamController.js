@@ -110,6 +110,29 @@ export const acceptInvite = async (req, res) => {
   }
 };
 
+// NEW: reject invite -> delete the teamMember row (only invited user can reject)
+export const rejectInvite = async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const userId = req.user.id;
+
+    const member = await prisma.teamMember.findUnique({
+      where: { teamId_userId: { teamId: Number(teamId), userId } }
+    });
+
+    if (!member) return res.status(404).json({ error: "Invite not found" });
+    if (member.userId !== userId) return res.status(403).json({ error: "Not authorized" });
+
+    await prisma.teamMember.delete({
+      where: { teamId_userId: { teamId: Number(teamId), userId } }
+    });
+
+    res.status(200).json({ message: "Invite rejected" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to reject invite", details: error.message });
+  }
+};
+
 export const getTeams = async (req, res) => {
   try {
     const teams = await prisma.team.findMany({
@@ -118,5 +141,27 @@ export const getTeams = async (req, res) => {
     res.json(teams);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch teams", details: error.message });
+  }
+};
+
+// View joined/created teams
+
+export const getMyTeams = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const teams = await prisma.team.findMany({
+      where: {
+        OR: [
+          { ownerId: Number(userId) },
+          { members: { some: { userId: Number(userId), status: 'accepted' } } }
+        ]
+      },
+      include: { members: { include: { user: true } } },
+    });
+
+    res.json(teams);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch user's teams", details: error.message });
   }
 };

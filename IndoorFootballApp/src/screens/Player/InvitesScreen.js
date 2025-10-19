@@ -31,6 +31,18 @@ export default function InvitesScreen() {
     }
   };
 
+  const rejectInvite = async (teamId) => {
+    try {
+      await api.post(`/teams/${teamId}/reject`);
+      Alert.alert('Rejected', 'Invite rejected.');
+      loadInvites();
+    } catch (err) {
+      console.error('rejectInvite', err?.response?.data || err.message);
+      const msg = err?.response?.data?.error || 'Failed to reject invite';
+      Alert.alert('Error', msg);
+    }
+  };
+
   useEffect(() => { loadInvites(); }, []);
 
   return (
@@ -42,8 +54,11 @@ export default function InvitesScreen() {
           <View style={styles.card}>
             <Text style={styles.teamName}>{item.team?.name || `Team ${item.teamId}`}</Text>
             <Text>Status: {item.status}</Text>
-            <View style={{ marginTop: 8 }}>
-              <Button title="Accept" onPress={() => acceptInvite(item.teamId)} />
+            <View style={{ flexDirection: 'row', marginTop: 8 }}>
+              <View style={{ marginRight: 8 }}>
+                <Button title="Accept" onPress={() => acceptInvite(item.teamId)} />
+              </View>
+              <Button color="#d9534f" title="Reject" onPress={() => rejectInvite(item.teamId)} />
             </View>
           </View>
         )}
