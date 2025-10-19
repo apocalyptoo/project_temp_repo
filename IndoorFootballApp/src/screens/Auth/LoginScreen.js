@@ -26,6 +26,11 @@ export default function LoginScreen({ navigation }) {
       <View style={{ marginTop: 12 }}>
         <Button title="Register" onPress={() => navigation.navigate('Register')} />
       </View>
+
+      {/* NEW: Forgot password */}
+      <View style={{ marginTop: 12 }}>
+        <Button title="Forgot password?" onPress={() => navigation.navigate('ForgotPassword')} />
+      </View>
     </View>
   );
 }

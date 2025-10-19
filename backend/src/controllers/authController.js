@@ -61,7 +61,7 @@ export const register = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   const { token } = req.query;
   try {
-    const user = await prisma.user.findFirst({ where: { verifyToken: token } });
+    const user = await prisma.user.findFirst({ where: { verifyToken: token } });   //checks if token is present in table
     if (!user) return res.status(400).json({ error: 'Invalid or expired token' });
 
     await prisma.user.update({
@@ -81,12 +81,12 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    if (!user) return res.status(400).json({ error: 'Invalid email' });
 
     if (!user.verified) return res.status(403).json({ error: 'Please verify your email before logging in.' });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ error: 'Invalid credentials' });
+    if (!match) return res.status(400).json({ error: 'Incorrect Password!' });
 
     const token = jwt.sign(
       { id: user.id, userId: user.id, role: user.role, email: user.email },
@@ -107,8 +107,7 @@ export const requestPasswordReset = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      // don't reveal existence
-      return res.json({ message: 'If that email exists, a reset link was sent.' });
+      return res.json({ message: 'If that email exists, a reset link was sent.' });   //hide existance of email
     }
 
     const token = crypto.randomBytes(32).toString('hex');

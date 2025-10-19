@@ -18,3 +18,6 @@ app.get('/', (req, res) => res.send('API running ✅'));
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
+
+
+//GET http://localhost:4000/players/invites
