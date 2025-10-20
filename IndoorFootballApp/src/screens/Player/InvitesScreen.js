@@ -1,6 +1,11 @@
+// src/screens/Invites/InvitesScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Text, Button, Alert, StyleSheet } from 'react-native';
+import { View, FlatList, Text, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import api from '../../api/api';
+
+const PRIMARY_COLOR = '#3C6E71';
+const ACCENT_COLOR = '#284B63';
+const BG_COLOR = '#F1FAFB';
 
 export default function InvitesScreen() {
   const [invites, setInvites] = useState([]);
@@ -47,31 +52,105 @@ export default function InvitesScreen() {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={invites}
-        keyExtractor={i => String(i.id)}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.teamName}>{item.team?.name || `Team ${item.teamId}`}</Text>
-            <Text>Status: {item.status}</Text>
-            <View style={{ flexDirection: 'row', marginTop: 8 }}>
-              <View style={{ marginRight: 8 }}>
-                <Button title="Accept" onPress={() => acceptInvite(item.teamId)} />
+      <Text style={styles.title}>Team Invites</Text>
+
+      {loading ? (
+        <ActivityIndicator size="large" color={PRIMARY_COLOR} style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={invites}
+          keyExtractor={i => String(i.id)}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.teamName}>{item.team?.name || `Team ${item.teamId}`}</Text>
+              <Text style={styles.status}>Status: {item.status}</Text>
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.button, styles.acceptButton]}
+                  onPress={() => acceptInvite(item.teamId)}
+                >
+                  <Text style={styles.buttonText}>Accept</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.button, styles.rejectButton]}
+                  onPress={() => rejectInvite(item.teamId)}
+                >
+                  <Text style={styles.buttonText}>Reject</Text>
+                </TouchableOpacity>
               </View>
-              <Button color="#d9534f" title="Reject" onPress={() => rejectInvite(item.teamId)} />
             </View>
-          </View>
-        )}
-        refreshing={loading}
-        onRefresh={loadInvites}
-        ListEmptyComponent={<Text style={{ padding: 12 }}>No pending invites</Text>}
-      />
+          )}
+          refreshing={loading}
+          onRefresh={loadInvites}
+          ListEmptyComponent={<Text style={styles.emptyText}>No pending invites</Text>}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  card: { padding: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 8 },
-  teamName: { fontWeight: '700', fontSize: 16 }
+  container: {
+    flex: 1,
+    backgroundColor: BG_COLOR,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: ACCENT_COLOR,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  teamName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: ACCENT_COLOR,
+    marginBottom: 4,
+  },
+  status: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 12,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  acceptButton: {
+    backgroundColor: PRIMARY_COLOR,
+    marginRight: 8,
+  },
+  rejectButton: {
+    backgroundColor: '#d9534f',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#777',
+    marginTop: 20,
+  },
 });

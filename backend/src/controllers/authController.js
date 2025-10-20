@@ -119,6 +119,9 @@ export const requestPasswordReset = async (req, res) => {
     });
 
     const resetLink = `${process.env.BACKEND_PUBLIC_URL || process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset?token=${token}`;
+    //const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    //const resetLink = `Your password reset token is: ${token}`;
+    
     await transporter.sendMail({
       from: `"App Support" <${process.env.EMAIL_USER}>`,
       to: email,
