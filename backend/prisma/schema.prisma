@@ -61,6 +61,10 @@ model TeamMember {
 }
 
 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 
 /*model User {
   id        Int      @id @default(autoincrement())
