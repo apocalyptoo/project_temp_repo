@@ -1,82 +1,132 @@
+
+
 // src/screens/Player/PlayersListScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  FlatList,
+  Text,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import api from '../../api/api';
-
-const PRIMARY_COLOR = '#3C6E71';
-const ACCENT_COLOR = '#284B63';
-const BG_COLOR = '#F1FAFB';
 
 export default function PlayersListScreen() {
   const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const loadPlayers = async () => {
+    setLoading(true);
     try {
       const res = await api.get('/players');
       setPlayers(res.data);
     } catch (err) {
       console.error('loadPlayers', err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => { loadPlayers(); }, []);
+  useEffect(() => {
+    loadPlayers();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Players</Text>
-      <FlatList
-        data={players}
-        keyExtractor={i => String(i.id)}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.email}>{item.email}</Text>
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.emptyText}>No players found</Text>}
-      />
+      {/* Header */}
+      <LinearGradient colors={['#1E3A8A', '#3B82F6']} style={styles.header}>
+        <Animated.Text entering={FadeInDown.duration(500)} style={styles.headerTitle}>
+          Players
+        </Animated.Text>
+      </LinearGradient>
+
+      {/* List */}
+      {loading ? (
+        <ActivityIndicator size="large" color="#1E3A8A" style={{ marginTop: 30 }} />
+      ) : (
+        <FlatList
+          data={players}
+          keyExtractor={(i) => String(i.id)}
+          contentContainerStyle={styles.list}
+          renderItem={({ item, index }) => (
+            <Animated.View entering={FadeInUp.delay(index * 80)}>
+              <LinearGradient
+                colors={['#FFFFFF', '#a1d3f5ff']}
+                style={styles.card} 
+              >
+                <Image
+                  source={require('../../../assets/icons/player.png')}
+                  style={styles.icon}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.name}>{item.name}</Text>
+                  <Text style={styles.email}>{item.email}</Text>
+                </View>
+              </LinearGradient>
+            </Animated.View>
+          )}
+          ListEmptyComponent={<Text style={styles.empty}>No players found</Text>}
+        />
+
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BG_COLOR,
-    paddingHorizontal: 16,
-    paddingTop: 20,
+  container: { flex: 1, backgroundColor: '#ffffffff' },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    elevation: 4,
   },
-  title: {
-    fontSize: 24,
+  headerTitle: {
+    fontSize: 26,
     fontWeight: '700',
-    color: ACCENT_COLOR,
-    marginBottom: 16,
+    color: '#FFFFFF',
     textAlign: 'center',
   },
+  list: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 80,
+  },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
     padding: 16,
-    marginBottom: 10,
+    marginBottom: 12,
+    elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    shadowRadius: 5,
+  },
+  icon: {
+    width: 48,
+    height: 48,
+    marginRight: 12,
+    tintColor: '#1E3A8A',
   },
   name: {
     fontSize: 16,
     fontWeight: '700',
-    color: ACCENT_COLOR,
-    marginBottom: 4,
+    color: '#1E3A8A',
   },
   email: {
     fontSize: 14,
     color: '#555',
   },
-  emptyText: {
+  empty: {
     textAlign: 'center',
+    marginTop: 30,
     color: '#777',
-    marginTop: 20,
   },
 });

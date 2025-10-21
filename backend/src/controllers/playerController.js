@@ -35,3 +35,20 @@ export const getPendingInvites = async (req, res) => {
 };
 
 
+//  get player stats
+export const getPlayerStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const totalTeams = await prisma.teamMember.count({ where: { userId: Number(id) } });
+    const user = await prisma.user.findUnique({ where: { id: Number(id) } });
+    res.json({
+      totalTeams,
+      joinedAt: user?.createdAt,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch player stats', details: err.message });
+  }
+};
+
+
+

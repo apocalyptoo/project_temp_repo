@@ -1,11 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
 }
 
 datasource db {
@@ -13,181 +11,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 model User {
-  id       Int      @id @default(autoincrement())
-  name     String
-  email    String   @unique
-  password String
-  role     Role     @default(PLAYER)
-  createdAt DateTime @default(now())
-  verified    Boolean   @default(false)
-  verifyToken String?
-  resetToken   String?
+  id                Int          @id @default(autoincrement())
+  name              String
+  email             String       @unique
+  password          String
+  role              Role         @default(PLAYER)
+  createdAt         DateTime     @default(now())
+  verified          Boolean      @default(false)
+  verifyToken       String?
+  resetToken        String?
   resetTokenExpires DateTime?
-
-  ownedTeams  Team[]        @relation("OwnedTeams")
-  teamMembers TeamMember[]
-}
-
-enum Role {
-  PLAYER
-  OWNER
-  ADMIN
+  ownedTeams        Team[]       @relation("OwnedTeams")
+  teamMembers       TeamMember[]
 }
 
 model Team {
-  id          Int           @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
   description String?
   ownerId     Int
-  owner       User           @relation("OwnedTeams", fields: [ownerId], references: [id])
+  createdAt   DateTime     @default(now())
+  owner       User         @relation("OwnedTeams", fields: [ownerId], references: [id])
   members     TeamMember[]
-  createdAt   DateTime       @default(now())
 }
 
 model TeamMember {
-  id        Int      @id @default(autoincrement())
-  teamId    Int
-  userId    Int
-  role      String   @default("player") // could be "player", "captain"
-  status    String   @default("pending") // "pending", "accepted"
-  team      Team     @relation(fields: [teamId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-  joinedAt  DateTime @default(now())
+  id       Int      @id @default(autoincrement())
+  teamId   Int
+  userId   Int
+  role     String   @default("player")
+  status   String   @default("pending")
+  joinedAt DateTime @default(now())
+  team     Team     @relation(fields: [teamId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
   @@unique([teamId, userId])
 }
 
-
-generator erd {
-  provider = "prisma-erd-generator"
-}
-
-
-/*model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(PLAYER)
-  profile   Profile?
-  teams     Team[]   @relation("TeamOwner")
-  teamMembers TeamMember[]
-  createdAt DateTime @default(now())
-}
-
-model Profile {
-  id      Int    @id @default(autoincrement())
-  user    User   @relation(fields: [userId], references: [id])
-  userId  Int    @unique
-  bio     String?
-  phone   String?
-  avatar  String?  // URL to uploaded avatar
-}
-
-model Team {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String?
-  owner       User      @relation("TeamOwner", fields: [ownerId], references: [id])
-  ownerId     Int
-  members     TeamMember[]
-  createdAt   DateTime  @default(now())
-}
-
-model TeamMember {
-  id       Int    @id @default(autoincrement())
-  team     Team   @relation(fields: [teamId], references: [id])
-  teamId   Int
-  user     User   @relation(fields: [userId], references: [id])
-  userId   Int
-  role     String // "owner", "player"
-  status   MemberStatus @default(PENDING) // PENDING, ACCEPTED, REJECTED
-  joinedAt DateTime?
-}
-
-model Invitation {
-  id         Int      @id @default(autoincrement())
-  fromUserId Int
-  toUserId   Int
-  teamId     Int
-  message    String?
-  status     InvitationStatus @default(PENDING)
-  createdAt  DateTime @default(now())
-}
-
-model Tournament {
-  id         Int      @id @default(autoincrement())
-  title      String
-  ownerId    Int      // indoor owner
-  owner      User     @relation(fields: [ownerId], references: [id])
-  maxTeams   Int?
-  teams      TournamentEnrollment[]
-  createdAt  DateTime @default(now())
-  startDate  DateTime?
-}
-
-model TournamentEnrollment {
-  id           Int    @id @default(autoincrement())
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId Int
-  teamId       Int
-  status       EnrollmentStatus @default(PENDING) // ACCEPTED, REJECTED, PENDING
-}
-
-model Field {
-  id          Int     @id @default(autoincrement())
-  ownerId     Int
-  owner       User    @relation(fields: [ownerId], references: [id])
-  name        String
-  location    String
-  pricePerHour Float
-  isPublished Boolean @default(false)
-}
-
-model Booking {
-  id        Int     @id @default(autoincrement())
-  fieldId   Int
-  teamId    Int?
-  userId    Int    // who booked
-  startAt   DateTime
-  endAt     DateTime
-  status    BookingStatus @default(CONFIRMED)
-  createdAt DateTime @default(now())
-}
-
-model Message {
-  id        Int      @id @default(autoincrement())
-  teamId    Int
-  senderId  Int
-  text      String
-  createdAt DateTime @default(now())
-}
 enum Role {
   PLAYER
   OWNER
   ADMIN
 }
-enum MemberStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-enum InvitationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-enum EnrollmentStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-enum BookingStatus {
-  CONFIRMED
-  CANCELLED
-  COMPLETED
-}*/
-

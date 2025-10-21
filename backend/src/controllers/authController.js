@@ -23,7 +23,8 @@ transporter.verify(function (error, success) {
 
 // REGISTER
 export const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
+
   try {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return res.status(400).json({ error: 'Email already registered' });
@@ -31,9 +32,11 @@ export const register = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const token = crypto.randomBytes(32).toString('hex');
 
+  
     const user = await prisma.user.create({
-      data: { name, email, password: hashed, role, verifyToken: token },
+      data: { name, email, password: hashed, role: 'PLAYER', verifyToken: token },
     });
+
 
     const verifyLink = `${process.env.BACKEND_PUBLIC_URL || process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/verify?token=${token}`;
 
@@ -94,7 +97,7 @@ export const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
+    res.json({ token, user: { id: user.id, name: user.name,email: user.email, role: user.role } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -120,7 +123,6 @@ export const requestPasswordReset = async (req, res) => {
 
     const resetLink = `${process.env.BACKEND_PUBLIC_URL || process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset?token=${token}`;
     //const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    //const resetLink = `Your password reset token is: ${token}`;
     
     await transporter.sendMail({
       from: `"App Support" <${process.env.EMAIL_USER}>`,

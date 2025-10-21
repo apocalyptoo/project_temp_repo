@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import api from '../../api/api';
 
 export default function ManageTeamsScreen() {
@@ -25,78 +35,124 @@ export default function ManageTeamsScreen() {
   }, []);
 
   const handleDelete = (teamId) => {
-    const confirmDelete = async () => {
-      try {
-        setDeletingId(teamId);
-        await api.delete(`/admin/teams/${teamId}`);
-        await loadTeams();
-        Alert.alert('Deleted', 'Team was deleted successfully.');
-      } catch (err) {
-        console.error('Delete team failed', err);
-        Alert.alert('Error', err.response?.data?.error || 'Failed to delete team');
-      } finally {
-        setDeletingId(null);
-      }
-    };
-
-    Alert.alert('Confirm', 'Are you sure you want to delete this team?', [
+    Alert.alert('Confirm', 'Delete this team?', [
       { text: 'Cancel' },
-      { text: 'Delete', style: 'destructive', onPress: confirmDelete }
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setDeletingId(teamId);
+            await api.delete(`/admin/teams/${teamId}`);
+            await loadTeams();
+            Alert.alert('Deleted', 'Team deleted successfully.');
+          } catch (err) {
+            Alert.alert('Error', 'Failed to delete team');
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      },
     ]);
   };
 
-  if (loading) {
+  if (loading)
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#1E3A8A" />
       </View>
     );
-  }
 
-  if (!teams.length) {
+  if (!teams.length)
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>No teams found.</Text>
       </View>
     );
-  }
 
   return (
-    <FlatList
-      data={teams}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{ padding: 12 }}
-      renderItem={({ item }) => (
-        <View style={styles.card}>
-          <View style={styles.row}>
-            <Text style={styles.title}>{item.name}</Text>
-            <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-          </View>
+    <View style={styles.container}>
+      <LinearGradient colors={['#1E3A8A', '#3B82F6']} style={styles.header}>
+        <Animated.Text entering={FadeInDown.duration(500)} style={styles.headerText}>
+          Manage Teams
+        </Animated.Text>
+      </LinearGradient>
 
-          <Text style={styles.sub}>Owner: {item.owner?.name || item.ownerId}</Text>
-          {item.owner?.email ? <Text style={styles.sub}>Owner email: {item.owner.email}</Text> : null}
+      <FlatList
+        data={teams}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 16 }}
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInUp.delay(index * 100)}>
+            <LinearGradient
+              colors={['#FFFFFF', '#a1d3f5ff']}
+              style={{
+                padding: 16,
+                borderRadius: 16,
+                marginBottom: 12,
+                elevation: 2,
+              }}
+            >
+              <Text style={[styles.title, { color: '#1E3A8A' }]}>{item.name}</Text>
+              <Text style={[styles.sub, { color: '#333' }]}>
+                Owner: {item.owner?.name || item.ownerId}
+              </Text>
+              <Text style={[styles.date, { color: '#555' }]}>
+                Created: {new Date(item.createdAt).toLocaleDateString()}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.deleteButton,
+                  { backgroundColor: '#3B82F6', paddingVertical: 8, borderRadius: 10, marginTop: 12 },
+                ]}
+                onPress={() => handleDelete(item.id)}
+                disabled={deletingId === item.id}
+              >
+                <Text style={[styles.deleteText, { color: '#fff' }]}>
+                  {deletingId === item.id ? 'Deleting...' : 'Delete Team'}
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </Animated.View>
+        )}
+      />
 
-          <View style={styles.actions}>
-            <Button
-              title={deletingId === item.id ? 'Deleting...' : 'Delete Team'}
-              color="#d9534f"
-              onPress={() => handleDelete(item.id)}
-              disabled={deletingId === item.id}
-            />
-          </View>
-        </View>
-      )}
-    />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 },
-  card: { backgroundColor: '#fff', padding: 12, marginBottom: 12, borderRadius: 10, elevation: 2 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { fontSize: 16, fontWeight: '700' },
-  date: { fontSize: 12, color: '#666' },
-  sub: { marginTop: 6, color: '#444' },
-  actions: { marginTop: 12, flexDirection: 'row', justifyContent: 'flex-end' },
-  emptyText: { fontSize: 16, color: '#666' },
+  container: { flex: 1, backgroundColor: '#F9FAFB' },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 3,
+  },
+  title: { fontSize: 18, fontWeight: '700', color: '#1E3A8A' },
+  sub: { marginTop: 6, color: '#333' },
+  date: { marginTop: 4, color: '#666', fontSize: 12 },
+  deleteButton: {
+    marginTop: 10,
+    backgroundColor: '#EF4444',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  deleteText: { color: '#fff', fontWeight: '700' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { color: '#555', fontSize: 16 },
 });

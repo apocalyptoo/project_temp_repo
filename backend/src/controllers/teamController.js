@@ -43,31 +43,11 @@ export const joinTeam = async (req, res) => {
   }
 };
 
-/*export const invitePlayer = async (req, res) => {
-  try {
-    const { teamId } = req.params;
-    const { userId } = req.body;
-    const inviterId = req.user.id;
 
-    const team = await prisma.team.findUnique({ where: { id: Number(teamId) } });
-
-    if (team.ownerId !== inviterId) {
-      return res.status(403).json({ error: "Only the team owner can invite players." });
-    }
-
-    const invite = await prisma.teamMember.create({
-      data: { teamId: Number(teamId), userId, status: "pending" },
-    });
-
-    res.status(201).json(invite);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to invite player", details: error.message });
-  }
-};*/
 export const invitePlayer = async (req, res) => {
   try {
     const { teamId } = req.params;
-    const { userId } = req.body; // now this is directly the selected player ID
+    const { userId } = req.body;
     const inviterId = req.user.id;
 
     const team = await prisma.team.findUnique({ where: { id: Number(teamId) } });
@@ -110,7 +90,7 @@ export const acceptInvite = async (req, res) => {
   }
 };
 
-// NEW: reject invite -> delete the teamMember row (only invited user can reject)
+// reject invite -> delete the teamMember row (only invited user can reject)
 export const rejectInvite = async (req, res) => {
   try {
     const { teamId } = req.params;

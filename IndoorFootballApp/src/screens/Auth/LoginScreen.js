@@ -1,4 +1,3 @@
-
 // src/screens/Auth/LoginScreen.js
 import React, { useState, useContext } from 'react';
 import {
@@ -11,7 +10,6 @@ import {
   Alert,
 } from 'react-native';
 import { AuthContext } from '../../contexts/AuthContext';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Make sure you have this installed
 
 export default function LoginScreen({ navigation }) {
   const { login } = useContext(AuthContext);
@@ -32,14 +30,13 @@ export default function LoginScreen({ navigation }) {
     <View style={styles.container}>
       {/* Logo Section */}
       <View style={styles.logoContainer}>
-        {/* Replace with your logo */}
         <Image
           source={require('../../../assets/icons/ball.png')}
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.brandName}>BRAND NAME</Text>
-        <Text style={styles.slogan}>SLOGAN HERE</Text>
+        <Text style={styles.brandName}>ConnectArena</Text>
+        <Text style={styles.slogan}>Unleash Your Inner Champion</Text>
       </View>
 
       {/* Tabs (Login / Signup) */}
@@ -55,7 +52,6 @@ export default function LoginScreen({ navigation }) {
       {/* Form Section */}
       <View style={styles.form}>
         <View style={styles.inputContainer}>
-          <Icon name="email-outline" size={20} color="#888" style={styles.icon} />
           <TextInput
             placeholder="Email Address"
             placeholderTextColor="#888"
@@ -68,7 +64,6 @@ export default function LoginScreen({ navigation }) {
         </View>
 
         <View style={styles.inputContainer}>
-          <Icon name="lock-outline" size={20} color="#888" style={styles.icon} />
           <TextInput
             placeholder="Password"
             placeholderTextColor="#888"
@@ -78,11 +73,9 @@ export default function LoginScreen({ navigation }) {
             style={styles.input}
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Icon
-              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-              size={20}
-              color="#888"
-            />
+            <Text style={styles.toggleText}>
+              {showPassword ? 'Hide' : 'Show'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -160,14 +153,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: '#fff',
   },
-  icon: {
-    marginRight: 8,
-  },
   input: {
     flex: 1,
     fontSize: 15,
     color: '#333',
     paddingVertical: 10,
+  },
+  toggleText: {
+    fontSize: 14,
+    color: '#007bff',
+    fontWeight: '500',
+    marginLeft: 8,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
